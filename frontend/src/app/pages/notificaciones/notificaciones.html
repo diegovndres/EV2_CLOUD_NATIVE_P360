@@ -10,9 +10,14 @@
     <a routerLink="/clientes" routerLinkActive="active">Clientes</a>
     <a routerLink="/notificaciones" routerLinkActive="active">Notificaciones</a>
   </nav>
-  <button class="btn-primary">+ Nueva notificación</button>
+  <button class="btn-primary" type="button" (click)="abrirModal()">+ Nueva notificación</button>
 </header>
 <main class="container">
+  @if (feedback && !modalAbierto) {
+    <div class="alert" [class.alert-ok]="feedback.tipo === 'ok'" [class.alert-error]="feedback.tipo === 'error'">
+      {{ feedback.texto }}
+    </div>
+  }
   <section class="panel">
     <div class="panel-header">
       <h2>Notificaciones</h2>
@@ -46,3 +51,31 @@
     </table>
   </section>
 </main>
+
+@if (modalAbierto) {
+  <div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Nueva notificación</h2>
+      <p class="modal-hint">El mensaje se publica en RabbitMQ y se procesa de forma asíncrona.</p>
+
+      <label for="destinatario">Destinatario</label>
+      <input id="destinatario" type="text" maxlength="150" [(ngModel)]="destinatario"
+             placeholder="correo@ejemplo.cl" class="search-input">
+
+      <label for="mensaje">Mensaje</label>
+      <textarea id="mensaje" rows="4" maxlength="500" [(ngModel)]="mensaje"
+                placeholder="Escribe el mensaje..." class="search-input"></textarea>
+
+      @if (feedback?.tipo === 'error') {
+        <div class="alert alert-error">{{ feedback!.texto }}</div>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="cerrarModal()" [disabled]="enviando">Cancelar</button>
+        <button type="button" class="btn-primary" (click)="enviar()" [disabled]="enviando">
+          {{ enviando ? 'Enviando...' : 'Enviar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

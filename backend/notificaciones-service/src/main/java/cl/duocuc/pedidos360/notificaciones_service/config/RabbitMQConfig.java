@@ -43,6 +43,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public TopicExchange notificacionesExchange() {
+        return new TopicExchange(props.notificacionesExchange(), true, false);
+    }
+
+    @Bean
     public DirectExchange deadLetterExchange() {
         return new DirectExchange(props.dlxExchange(), true, false);
     }
@@ -117,6 +122,30 @@ public class RabbitMQConfig {
     @Bean
     public Binding notificacionClienteDlqBinding() {
         return BindingBuilder.bind(notificacionClienteDlq()).to(deadLetterExchange()).with(props.queueNotificacionClienteDlq());
+    }
+
+    // ---------- Notificaciones manuales (productor: frontend via REST) ----------
+    @Bean
+    public Queue notificacionManualQueue() {
+        return QueueBuilder.durable(props.queueNotificacionManual())
+                .deadLetterExchange(props.dlxExchange())
+                .deadLetterRoutingKey(props.queueNotificacionManualDlq())
+                .build();
+    }
+
+    @Bean
+    public Queue notificacionManualDlq() {
+        return QueueBuilder.durable(props.queueNotificacionManualDlq()).build();
+    }
+
+    @Bean
+    public Binding notificacionManualBinding() {
+        return BindingBuilder.bind(notificacionManualQueue()).to(notificacionesExchange()).with(props.routingKeyNotificacionManual());
+    }
+
+    @Bean
+    public Binding notificacionManualDlqBinding() {
+        return BindingBuilder.bind(notificacionManualDlq()).to(deadLetterExchange()).with(props.queueNotificacionManualDlq());
     }
 
     @Bean

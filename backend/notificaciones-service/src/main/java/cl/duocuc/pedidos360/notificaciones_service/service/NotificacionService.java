@@ -2,6 +2,7 @@ package cl.duocuc.pedidos360.notificaciones_service.service;
 
 import cl.duocuc.pedidos360.notificaciones_service.messaging.MensajeNoProcesableException;
 import cl.duocuc.pedidos360.notificaciones_service.messaging.event.ClienteCreadoEvent;
+import cl.duocuc.pedidos360.notificaciones_service.messaging.event.NotificacionManualEvent;
 import cl.duocuc.pedidos360.notificaciones_service.messaging.event.PedidoCreadoEvent;
 import cl.duocuc.pedidos360.notificaciones_service.model.Notificacion;
 import cl.duocuc.pedidos360.notificaciones_service.repository.NotificacionRepository;
@@ -36,6 +37,14 @@ public class NotificacionService {
             throw new MensajeNoProcesableException("Evento de cliente invalido (falta id o email)");
         }
         return guardar("Bienvenido/a " + e.nombre() + ", tu cuenta fue creada", e.email(), "ENVIADA");
+    }
+
+    public Notificacion registrarNotificacionManual(NotificacionManualEvent e) {
+        if (e == null || e.destinatario() == null || e.destinatario().isBlank()
+                || e.mensaje() == null || e.mensaje().isBlank()) {
+            throw new MensajeNoProcesableException("Notificacion manual invalida (falta destinatario o mensaje)");
+        }
+        return guardar(e.mensaje(), e.destinatario(), "ENVIADA");
     }
 
     private void validar(PedidoCreadoEvent e) {

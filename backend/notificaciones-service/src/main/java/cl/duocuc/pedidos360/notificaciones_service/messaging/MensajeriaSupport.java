@@ -9,13 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/**
- * Manejo centralizado de ACK y errores:
- *  - Exito                         -> basicAck
- *  - MensajeNoProcesableException  -> basicNack(requeue=false) -> DLQ + log
- *  - Error recuperable (ej. BD)    -> reintenta hasta max-retries (header x-retry-count)
- *  - Reintentos agotados           -> basicNack(requeue=false) -> DLQ + log
- */
+
 @Component
 public class MensajeriaSupport {
 
@@ -95,3 +89,5 @@ public class MensajeriaSupport {
         }
     }
 }
+
+fwafawawf

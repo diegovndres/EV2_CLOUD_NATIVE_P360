@@ -15,5 +15,9 @@ public record RabbitMQProperties(
         String queueTicketPedido,
         String queueTicketPedidoDlq,
         String queueNotificacionCliente,
-        String queueNotificacionClienteDlq) {
+        String queueNotificacionClienteDlq,
+        String notificacionesExchange,
+        String routingKeyNotificacionManual,
+        String queueNotificacionManual,
+        String queueNotificacionManualDlq) {
 }
