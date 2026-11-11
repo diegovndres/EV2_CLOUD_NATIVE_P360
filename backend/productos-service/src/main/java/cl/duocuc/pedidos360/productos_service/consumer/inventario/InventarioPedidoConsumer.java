@@ -3,6 +3,8 @@ package cl.duocuc.pedidos360.productos_service.consumer.inventario;
 import cl.duocuc.pedidos360.productos_service.messaging.MensajeNoProcesableException;
 import cl.duocuc.pedidos360.productos_service.messaging.MensajeriaSupport;
 import cl.duocuc.pedidos360.productos_service.messaging.event.PedidoCreadoEvent;
+import cl.duocuc.pedidos360.productos_service.messaging.kafka.StockAlertaProducer;
+import cl.duocuc.pedidos360.productos_service.model.Producto;
 import cl.duocuc.pedidos360.productos_service.service.InventarioService;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -15,10 +17,14 @@ public class InventarioPedidoConsumer {
 
     private final InventarioService inventarioService;
     private final MensajeriaSupport support;
+    private final StockAlertaProducer stockAlertaProducer;
 
-    public InventarioPedidoConsumer(InventarioService inventarioService, MensajeriaSupport support) {
+    public InventarioPedidoConsumer(InventarioService inventarioService,
+                                    MensajeriaSupport support,
+                                    StockAlertaProducer stockAlertaProducer) {
         this.inventarioService = inventarioService;
         this.support = support;
+        this.stockAlertaProducer = stockAlertaProducer;
     }
 
     @RabbitListener(queues = "${app.rabbitmq.queue-inventario-pedido}")
@@ -31,7 +37,9 @@ public class InventarioPedidoConsumer {
             if (evento == null || evento.pedidoId() == null) {
                 throw new MensajeNoProcesableException("Evento de pedido invalido");
             }
-            inventarioService.descontarStock(evento.producto(), evento.cantidad());
+            Producto actualizado = inventarioService.descontarStock(evento.producto(), evento.cantidad());
+            // Kafka: la alerta nunca lanza excepción, así RabbitMQ sigue igual si Kafka falla
+            stockAlertaProducer.publicarSiStockBajo(actualizado, evento.pedidoId());
         });
     }
 }

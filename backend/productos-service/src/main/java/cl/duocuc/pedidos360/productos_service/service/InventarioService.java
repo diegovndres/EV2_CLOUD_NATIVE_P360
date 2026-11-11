@@ -16,7 +16,7 @@ public class InventarioService {
     }
 
     @Transactional
-    public void descontarStock(String nombreProducto, Integer cantidad) {
+    public Producto descontarStock(String nombreProducto, Integer cantidad) {
         if (nombreProducto == null || nombreProducto.isBlank() || cantidad == null || cantidad <= 0) {
             throw new MensajeNoProcesableException("Producto o cantidad invalidos");
         }
@@ -28,6 +28,6 @@ public class InventarioService {
                     + "': disponible=" + stockActual + ", pedido=" + cantidad);
         }
         producto.setStock(stockActual - cantidad);
-        productoRepository.save(producto);
+        return productoRepository.save(producto);
     }
 }
