@@ -4,6 +4,7 @@ import cl.duocuc.pedidos360.notificaciones_service.messaging.MensajeNoProcesable
 import cl.duocuc.pedidos360.notificaciones_service.messaging.event.ClienteCreadoEvent;
 import cl.duocuc.pedidos360.notificaciones_service.messaging.event.NotificacionManualEvent;
 import cl.duocuc.pedidos360.notificaciones_service.messaging.event.PedidoCreadoEvent;
+import cl.duocuc.pedidos360.notificaciones_service.messaging.kafka.StockAlertaEvent;
 import cl.duocuc.pedidos360.notificaciones_service.model.Notificacion;
 import cl.duocuc.pedidos360.notificaciones_service.repository.NotificacionRepository;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,9 @@ import java.time.LocalDate;
 
 @Service
 public class NotificacionService {
+
+    private static final String DESTINATARIO_INVENTARIO = "inventario@pedidos360.cl";
+    private static final String ESTADO_ALERTA_STOCK = "ALERTA_STOCK";
 
     private final NotificacionRepository notificacionRepository;
 
@@ -45,6 +49,18 @@ public class NotificacionService {
             throw new MensajeNoProcesableException("Notificacion manual invalida (falta destinatario o mensaje)");
         }
         return guardar(e.mensaje(), e.destinatario(), "ENVIADA");
+    }
+
+    /** Kafka: alerta de stock bajo publicada por productos-service en el topico stock-alertas. */
+    public Notificacion registrarAlertaStock(StockAlertaEvent e) {
+        if (e == null || e.producto() == null || e.producto().isBlank()
+                || e.stockActual() == null || e.umbral() == null) {
+            throw new MensajeNoProcesableException(
+                    "Alerta de stock invalida (falta producto, stockActual o umbral)");
+        }
+        String mensaje = "Stock bajo: '" + e.producto() + "' tiene " + e.stockActual()
+                + " unidades (umbral " + e.umbral() + ")";
+        return guardar(mensaje, DESTINATARIO_INVENTARIO, ESTADO_ALERTA_STOCK);
     }
 
     private void validar(PedidoCreadoEvent e) {
