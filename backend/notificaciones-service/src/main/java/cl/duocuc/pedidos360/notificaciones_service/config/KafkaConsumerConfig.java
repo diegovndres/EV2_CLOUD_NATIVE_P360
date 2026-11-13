@@ -1,4 +1,4 @@
-package cl.duocuc.pedidos360.notificaciones_service.messaging.kafka;
+package cl.duocuc.pedidos360.notificaciones_service.config;
 
 import cl.duocuc.pedidos360.notificaciones_service.messaging.MensajeNoProcesableException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

@@ -1,49 +1,45 @@
-package cl.duocuc.pedidos360.analitica_service.config;
+package cl.duocuc.pedidos360.notificaciones_service.config;
 
-import cl.duocuc.pedidos360.analitica_service.messaging.MensajeNoProcesableException;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.TopicPartition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
-import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.util.backoff.FixedBackOff;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
-public class KafkaConsumerConfig {
+public class SecurityConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(KafkaConsumerConfig.class);
+    @Value("${app.cors.allowed-origins:http://localhost:4200}")
+    private String allowedOrigins;
 
     @Bean
-    public DefaultErrorHandler kafkaErrorHandler(
-            KafkaTemplate<String, Object> kafkaTemplate,
-            @Value("${app.kafka.consumer.max-retries:3}") long maxRetries,
-            @Value("${app.kafka.consumer.retry-interval-ms:1000}") long intervalMs) {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .authorizeHttpRequests(auth -> auth
+                .anyRequest().authenticated()
+            )
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+        return http.build();
+    }
 
-        // Mensaje agotado => <topico>.DLT, particion -1 (la elige Kafka; el DLT tiene 1 particion)
-        DeadLetterPublishingRecoverer dlt = new DeadLetterPublishingRecoverer(
-                kafkaTemplate,
-                (record, ex) -> new TopicPartition(record.topic() + ".DLT", -1));
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
 
-        DefaultErrorHandler handler = new DefaultErrorHandler(
-                (ConsumerRecord<?, ?> record, Exception ex) -> {
-                    log.error("[KAFKA] Mensaje fallido enviado al DLT topic={} partition={} offset={} key={} causa={}",
-                            record.topic(), record.partition(), record.offset(), record.key(), ex.getMessage());
-                    dlt.accept(record, ex);
-                },
-                new FixedBackOff(intervalMs, maxRetries));
-
-        // Mensaje invalido: reintentar no sirve, va directo al DLT
-        handler.addNotRetryableExceptions(MensajeNoProcesableException.class);
-
-        handler.setRetryListeners((record, ex, attempt) ->
-                log.warn("[KAFKA] Reintento {} offset={} key={} causa={}",
-                        attempt, record.offset(), record.key(), ex.getMessage()));
-
-        return handler;
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
