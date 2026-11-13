@@ -1,0 +1,78 @@
+<header class="navbar">
+  <div class="navbar-brand">
+    <span class="logo-dot"></span>
+    <h1>Pedidos<span>360</span></h1>
+  </div>
+  <nav class="navbar-links">
+    <a routerLink="/home" routerLinkActive="active">Dashboard</a>
+    <a routerLink="/pedidos" routerLinkActive="active">Pedidos</a>
+    <a routerLink="/productos" routerLinkActive="active">Productos</a>
+    <a routerLink="/clientes" routerLinkActive="active">Clientes</a>
+    <a routerLink="/notificaciones" routerLinkActive="active">Notificaciones</a>
+    <a routerLink="/analitica" routerLinkActive="active">Analítica</a>
+  </nav>
+</header>
+<main class="container">
+  @if (error) {
+    <div class="alert alert-error">{{ error }}</div>
+  }
+
+  <section class="kpis">
+    <div class="kpi">
+      <div class="kpi-label">Productos analizados</div>
+      <div class="kpi-value">{{ metricas.length }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Pedidos procesados</div>
+      <div class="kpi-value">{{ totalPedidos }}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Unidades vendidas</div>
+      <div class="kpi-value">{{ totalUnidades }}</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Analítica de productos</h2>
+      <span class="hint">
+        Calculada desde Kafka (tópico pedidos-eventos) · se actualiza cada 10 s
+        @if (ultimaActualizacion) {
+          · {{ ultimaActualizacion | date: 'HH:mm:ss' }}
+        }
+      </span>
+    </div>
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Pedidos</th>
+          <th>Unidades vendidas</th>
+          <th>Promedio por pedido</th>
+          <th>Participación</th>
+          <th>Última actualización</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of metricas; track m.producto) {
+          <tr>
+            <td>{{ m.producto }}</td>
+            <td>{{ m.totalPedidos }}</td>
+            <td>{{ m.unidadesVendidas }}</td>
+            <td>{{ m.promedioUnidadesPorPedido | number: '1.1-2' }}</td>
+            <td class="col-bar">
+              <div class="bar-track">
+                <div class="bar-fill" [style.width.%]="porcentaje(m)"></div>
+              </div>
+            </td>
+            <td>{{ m.actualizadoEn | date: 'dd-MM-yyyy HH:mm:ss' }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="empty-row">Aún no hay métricas. Crea pedidos para generar eventos.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+</main>

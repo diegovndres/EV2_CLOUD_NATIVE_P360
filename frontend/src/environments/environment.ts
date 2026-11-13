@@ -13,7 +13,9 @@ export const environment = {
     pedidosUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/pedidos',
     productosUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/productos',
     clientesUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/clientes',
-    notificacionesUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/notificaciones'
+    notificacionesUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/notificaciones',
+    // Local: analitica-service directo. En AWS se reemplaza por la ruta del API Gateway (/analitica).
+    analiticaUri: 'http://localhost:8087'
   },
   system: {
     loggerOptions: {

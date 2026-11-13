@@ -45,6 +45,7 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
   protectedResourceMap.set(`${environment.apiConfig.productosUri}/*`, environment.apiConfig.scopes);
   protectedResourceMap.set(`${environment.apiConfig.clientesUri}/*`, environment.apiConfig.scopes);
   protectedResourceMap.set(`${environment.apiConfig.notificacionesUri}/*`, environment.apiConfig.scopes);
+  protectedResourceMap.set(`${environment.apiConfig.analiticaUri}/*`, environment.apiConfig.scopes);
 
   return {
     interactionType: InteractionType.Redirect,
