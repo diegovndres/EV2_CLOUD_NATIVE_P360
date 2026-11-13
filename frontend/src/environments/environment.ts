@@ -9,14 +9,13 @@ export const environment = {
   },
   apiConfig: {
     scopes: ['api://ac0cd280-33b6-4d33-ae42-aa056c7029fa/access_as_user'],
-    // TEMPORAL (prueba local): pedidos-service en mi PC. Valor original: la misma URL de pedidosUri.
-    uri: 'http://localhost:8081',
+    uri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/pedidos',
     pedidosUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/pedidos',
     productosUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/productos',
     clientesUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/clientes',
     notificacionesUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/notificaciones',
-    // Local: analitica-service directo. En AWS se reemplaza por la ruta del API Gateway (/analitica).
-    analiticaUri: 'http://localhost:8087'
+    // Analitica a traves del API Gateway (ruta /analitica -> EC2:8087)
+    analiticaUri: 'https://wrxinrzh5h.execute-api.us-east-1.amazonaws.com/analitica'
   },
   system: {
     loggerOptions: {
