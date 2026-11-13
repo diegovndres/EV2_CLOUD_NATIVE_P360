@@ -42,6 +42,7 @@ export function MSALInterceptorConfigFactory(): MsalInterceptorConfiguration {
 
   // Se registra cada microservicio para que el interceptor adjunte el token en todos
   protectedResourceMap.set(`${environment.apiConfig.pedidosUri}/*`, environment.apiConfig.scopes);
+  protectedResourceMap.set(`${environment.apiConfig.uri}/*`, environment.apiConfig.scopes);
   protectedResourceMap.set(`${environment.apiConfig.productosUri}/*`, environment.apiConfig.scopes);
   protectedResourceMap.set(`${environment.apiConfig.clientesUri}/*`, environment.apiConfig.scopes);
   protectedResourceMap.set(`${environment.apiConfig.notificacionesUri}/*`, environment.apiConfig.scopes);

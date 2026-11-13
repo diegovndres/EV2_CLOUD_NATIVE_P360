@@ -11,9 +11,15 @@
     <a routerLink="/notificaciones" routerLinkActive="active">Notificaciones</a>
     <a routerLink="/analitica" routerLinkActive="active">Analítica</a>
   </nav>
-  <button class="btn-primary">+ Nuevo pedido</button>
+  <button class="btn-primary" (click)="abrirModal()">+ Nuevo pedido</button>
 </header>
 <main class="container">
+  @if (feedback) {
+    <div class="alert" [class.alert-exito]="feedback.tipo === 'exito'" [class.alert-error]="feedback.tipo === 'error'">
+      {{ feedback.mensaje }}
+    </div>
+  }
+
   <section class="panel">
     <div class="panel-header">
       <h2>Pedidos</h2>
@@ -56,3 +62,54 @@
     </table>
   </section>
 </main>
+
+@if (mostrarModal) {
+  <div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>Nuevo pedido</h3>
+
+      @if (errorFormulario) {
+        <div class="alert alert-error">{{ errorFormulario }}</div>
+      }
+
+      <form (ngSubmit)="guardar()">
+        <div class="form-group">
+          <label for="cliente">Cliente</label>
+          <input id="cliente" name="cliente" type="text" [(ngModel)]="nuevo.cliente" required>
+        </div>
+
+        <div class="form-group">
+          <label for="producto">Producto</label>
+          <input id="producto" name="producto" type="text" [(ngModel)]="nuevo.producto" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cantidad">Cantidad</label>
+            <input id="cantidad" name="cantidad" type="number" min="1" step="1" [(ngModel)]="nuevo.cantidad" required>
+          </div>
+          <div class="form-group">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado" [(ngModel)]="nuevo.estado">
+              @for (e of estados; track e) {
+                <option [value]="e">{{ e }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="fecha">Fecha</label>
+          <input id="fecha" name="fecha" type="date" [(ngModel)]="nuevo.fecha" required>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="cerrarModal()" [disabled]="enviando">Cancelar</button>
+          <button type="submit" class="btn-primary" [disabled]="enviando">
+            {{ enviando ? 'Guardando...' : 'Crear pedido' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

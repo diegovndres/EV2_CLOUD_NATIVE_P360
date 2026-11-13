@@ -20,7 +20,7 @@ export class Pedidos implements OnInit {
   feedback: { tipo: 'exito' | 'error'; mensaje: string } | null = null;
 
   // Ajusta esta lista a los estados que ya usa tu backend.
-  estados = ['PENDIENTE', 'CONFIRMADO', 'ENVIADO', 'ENTREGADO'];
+  estados = ['CREADO', 'Pendiente', 'En camino', 'Entregado', 'Cancelado'];
   nuevo: NuevoPedido = this.pedidoVacio();
 
   private pedidosService = inject(PedidosService);
@@ -100,7 +100,7 @@ export class Pedidos implements OnInit {
       cliente: '',
       producto: '',
       cantidad: 1,
-      estado: 'PENDIENTE',
+      estado: 'Pendiente',
       fecha: new Date().toISOString().slice(0, 10) // yyyy-MM-dd
     };
   }
