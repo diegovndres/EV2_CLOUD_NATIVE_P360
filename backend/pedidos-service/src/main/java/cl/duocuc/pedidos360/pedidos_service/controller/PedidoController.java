@@ -1,5 +1,6 @@
 package cl.duocuc.pedidos360.pedidos_service.controller;
 
+import cl.duocuc.pedidos360.pedidos_service.messaging.kafka.PedidoKafkaProducer;
 import cl.duocuc.pedidos360.pedidos_service.messaging.producer.PedidoEventPublisher;
 import cl.duocuc.pedidos360.pedidos_service.model.Pedido;
 import cl.duocuc.pedidos360.pedidos_service.repository.PedidoRepository;
@@ -16,7 +17,10 @@ public class PedidoController {
     private PedidoRepository pedidoRepository;
 
     @Autowired
-    private PedidoEventPublisher pedidoEventPublisher;
+    private PedidoEventPublisher pedidoEventPublisher;   // RabbitMQ (sin cambios)
+
+    @Autowired
+    private PedidoKafkaProducer pedidoKafkaProducer;     // Kafka (nuevo)
 
     @GetMapping
     public List<Pedido> listar() {
@@ -26,7 +30,8 @@ public class PedidoController {
     @PostMapping
     public Pedido crear(@RequestBody Pedido pedido) {
         Pedido guardado = pedidoRepository.save(pedido);
-        pedidoEventPublisher.publicarPedidoCreado(guardado);
+        pedidoEventPublisher.publicarPedidoCreado(guardado);   // RabbitMQ
+        pedidoKafkaProducer.publicarPedidoCreado(guardado);    // Kafka
         return guardado;
     }
 }
